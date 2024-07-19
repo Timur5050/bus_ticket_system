@@ -1,20 +1,20 @@
-from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
 
 from station.models import Bus
 from station.serializers import BusSerializer
 
 
-@api_view(["GET", "POST"])
-def bus_list(request):
-    if request.method == "GET":
+class BusList(APIView):
+    def get(self, request) -> Response:
         buses = Bus.objects.all()
         serializer = BusSerializer(buses, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    else:
+
+    def post(self, request) -> Response:
         serializer = BusSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -22,19 +22,21 @@ def bus_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["GET", "PUT", "DELETE"])
-def bus_detail(request, pk):
-    bus = get_object_or_404(Bus, pk=pk)
-    if request.method == "GET":
-        serializer = BusSerializer(bus)
+class BusDetail(APIView):
+    def get_object(self, pk: int) -> Bus:
+        return get_object_or_404(Bus, pk=pk)
+
+    def get(self, request, pk: int) -> Response:
+        serializer = BusSerializer(self.get_object(pk))
         return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == "PUT":
-        serializer = BusSerializer(bus, data=request.data)
+
+    def put(self, request, pk: int) -> Response:
+        serializer = BusSerializer(self.get_object(pk), data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        bus.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def delete(self, request, pk: int) -> Response:
+        self.get_object(pk).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
