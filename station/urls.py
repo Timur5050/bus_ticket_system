@@ -1,18 +1,20 @@
-from django.urls import path
+from rest_framework import routers
+from django.urls import path, include
 
-from station.views import BusViewSet
+from station.views import (
+    BusViewSet,
+    TripViewSet,
+    FacilityViewSet
+)
 
-bus_list = BusViewSet.as_view(actions={"get": "list", "post": "create"})
+router = routers.DefaultRouter()
 
-bus_detail = BusViewSet.as_view(actions={
-            "get": "retrieve",
-            "put": "update",
-            "patch": "partial_update",
-            "delete": "destroy"
-        })
+router.register('buses', BusViewSet)
+router.register("trips", TripViewSet)
+router.register("facilities", FacilityViewSet)
 
 urlpatterns = [
-    path("buses/", bus_list, name="bus_list"),
-    path("buses/<int:pk>/", bus_detail, name="bus_detail"),
+    path("", include(router.urls)),
 ]
+
 app_name = "station"
