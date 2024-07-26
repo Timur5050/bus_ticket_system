@@ -7,7 +7,7 @@ from user.models import User
 
 
 class Facility(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
 
     class Meta:
         verbose_name_plural = 'Facilities'
@@ -46,7 +46,7 @@ class Trip(models.Model):
 
 class Ticket(models.Model):
     seat = models.IntegerField()
-    trip = models.ForeignKey(Trip, on_delete=models.CASCADE)
+    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="tickets")
     order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="tickets")
 
     class Meta:
